@@ -47,7 +47,7 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 40),
               AppButton(
                 onPressed: () {
-                  context.go('/api_test');
+                  context.go('/auth');
                 },
                 text: 'Get Started',
               ),

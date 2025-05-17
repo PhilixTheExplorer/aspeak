@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 
 class ApiService {
   // Base URLs for different environments
-  static const String _androidEmulatorUrl = 'http://10.39.168.44:8000';
-  static const String _iosSimulatorUrl = 'http://localhost:8000';
-  static const String _physicalDeviceUrl = 'http://10.39.168.44:8000'; // Replace with your computer's IP
+  static const String _androidEmulatorUrl = 'https://c2c9-202-28-7-39.ngrok-free.app';
+  static const String _iosSimulatorUrl = 'https://c2c9-202-28-7-39.ngrok-free.app';
+  static const String _physicalDeviceUrl = 'https://c2c9-202-28-7-39.ngrok-free.app'; // Replace with your computer's IP
 
   String response = "Waiting for response";
   // Get the appropriate base URL based on the platform
@@ -24,18 +24,8 @@ class ApiService {
   // Example GET request
   Future<dynamic> get(String endpoint) async {
     try {
-      final response = await http.get(Uri.parse("http://10.39.168.44:8000"));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          response = data["message"];
-        });
-      } else {
-        setState(() {
-          response = "Failed to make GET request";
-        });
-      }      
-      return response;
+      final response = await http.get(Uri.parse('$baseUrl$endpoint'));
+      return _handleResponse(response);
     } catch (e) {
       throw Exception('Failed to make GET request: $e');
     }
