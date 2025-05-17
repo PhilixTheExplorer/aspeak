@@ -3,6 +3,7 @@ import 'package:aspeak/features/audio/audio_recorder_screen.dart';
 import 'package:aspeak/features/auth/auth_screen.dart';
 import 'package:aspeak/features/welcome/welcome_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:aspeak/screens/api_test_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -28,6 +29,11 @@ class AppRouter {
         path: '/audio_recorder',
         name: 'audio_recorder',
         builder: (context, state) => const AudioRecorderScreen(),
+      ),
+      GoRoute(
+        path: '/api_test',
+        name: 'api_test',
+        builder: (context, state) => const ApiTestScreen(),
       ),
     ],
   );
