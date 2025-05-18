@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "349316653976",
+    "project_id": "aspeak-3645f",
+    "storage_bucket": "aspeak-3645f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349316653976:android:f0dd858eecdec8532641ed",
+        "android_client_info": {
+          "package_name": "com.example.aspeak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdPzk9K1V9XOMEQ1P_4b0M36CbPLgzIwA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

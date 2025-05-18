@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../../services/audio_service.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:aspeak/features/auth/auth_view_model.dart';
+import 'package:go_router/go_router.dart';
 
 class AudioRecorderScreen extends StatefulWidget {
   const AudioRecorderScreen({super.key});
@@ -14,7 +17,8 @@ class AudioRecorderScreen extends StatefulWidget {
   State<AudioRecorderScreen> createState() => _AudioRecorderScreenState();
 }
 
-class _AudioRecorderScreenState extends State<AudioRecorderScreen> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+class _AudioRecorderScreenState extends State<AudioRecorderScreen>
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   String? _selectedVoiceType;
   String _selectedLanguage = 'English';
   bool _isRecording = false;
@@ -37,29 +41,36 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
     super.initState();
     _selectedVoiceType = 'male';
     _audioRecorder = AudioRecorder();
-    
+
     // Initialize animation controller
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
     );
-    
+
     _animationController.repeat(reverse: true);
+  }
+
+  void _signOut(BuildContext context) async {
+    final viewModel = Provider.of<AuthViewModel>(context, listen: false);
+    await viewModel.signOut();
+    context.go('/auth');
   }
 
   Future<void> _startRecording() async {
     try {
       if (await _audioRecorder.hasPermission()) {
         final directory = await getTemporaryDirectory();
-        final filePath = '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
-        
+        final filePath =
+            '${directory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.wav';
+
         // Configure recording settings
         final config = RecordConfig(
           encoder: AudioEncoder.wav,
@@ -67,9 +78,9 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
           numChannels: 1,
           bitRate: 128000,
         );
-        
+
         await _audioRecorder.start(config, path: filePath);
-        
+
         setState(() {
           _isRecording = true;
           _recordedFile = File(filePath);
@@ -79,15 +90,18 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
         });
 
         // Start amplitude monitoring with higher frequency
-        _amplitudeTimer = Timer.periodic(const Duration(milliseconds: 20), (timer) async {
+        _amplitudeTimer =
+            Timer.periodic(const Duration(milliseconds: 20), (timer) async {
           if (_isRecording) {
             final amplitude = await _audioRecorder.getAmplitude();
             // Update max amplitude for dynamic scaling
-            _maxAmplitude = math.max(_maxAmplitude, amplitude.current.toDouble());
-            
+            _maxAmplitude =
+                math.max(_maxAmplitude, amplitude.current.toDouble());
+
             // Calculate normalized amplitude with dynamic scaling
-            final normalizedAmplitude = amplitude.current / (_maxAmplitude * 0.8);
-            
+            final normalizedAmplitude =
+                amplitude.current / (_maxAmplitude * 0.8);
+
             setState(() {
               _amplitudes.removeAt(0);
               _amplitudes.add(normalizedAmplitude.clamp(0.0, 1.0));
@@ -111,7 +125,7 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
       _amplitudeTimer?.cancel();
       final path = await _audioRecorder.stop();
       final originalFile = File(path!);
-      
+
       setState(() {
         _isRecording = false;
         _recordedFile = originalFile;
@@ -134,7 +148,7 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
             _isProcessing = false;
             _statusMessage = '';
           });
-          
+
           context.push('/audio_playback', extra: {
             'processedAudioFile': processedFile,
             'originalAudioFile': originalFile,
@@ -207,7 +221,9 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF64CCC5),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.menu))],
+        actions: [
+          IconButton(onPressed: () => _signOut(context), icon: Icon(Icons.logout))
+        ],
       ),
       backgroundColor: const Color(0xFF64CCC5),
       body: Padding(
@@ -259,7 +275,8 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
                                 height: 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: _isRecording ? Colors.grey : Colors.black,
+                                  color:
+                                      _isRecording ? Colors.grey : Colors.black,
                                 ),
                                 child: Icon(
                                   Icons.mic,
@@ -276,7 +293,8 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen> with Automati
                                 height: 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: _isRecording ? Colors.black : Colors.grey,
+                                  color:
+                                      _isRecording ? Colors.black : Colors.grey,
                                 ),
                                 child: Icon(
                                   Icons.stop,
@@ -405,7 +423,7 @@ class WaveformPainter extends CustomPainter {
     for (int i = 0; i < amplitudes.length; i++) {
       final x = i * barWidth;
       final amplitude = amplitudes[i] * (height / 2);
-      
+
       if (i == 0) {
         path.moveTo(x, centerY + amplitude);
       } else {

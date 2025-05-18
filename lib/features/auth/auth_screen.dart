@@ -1,6 +1,8 @@
 import 'package:aspeak/core/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'auth_view_model.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -16,7 +18,11 @@ class _AuthScreenState extends State<AuthScreen>
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _signUpEmailController = TextEditingController();
   final TextEditingController _signUpPasswordController =
-      TextEditingController();
+  TextEditingController();
+  bool _isLoading = false;
+  String? _errorMessage;
+  bool _obscurePassword = true;
+  bool _obscureSignUpPassword = true;
 
   @override
   void initState() {
@@ -32,6 +38,102 @@ class _AuthScreenState extends State<AuthScreen>
     _signUpEmailController.dispose();
     _signUpPasswordController.dispose();
     super.dispose();
+  }
+
+  void _signIn(BuildContext context) async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Email and password cannot be empty';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final viewModel = Provider.of<AuthViewModel>(context, listen: false);
+    final success = await viewModel.signInWithEmailAndPassword(
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      context.go('/audio_recorder');
+    } else {
+      setState(() {
+        _errorMessage = viewModel.errorMessage;
+      });
+    }
+  }
+
+  void _signUp(BuildContext context) async {
+    if (_signUpEmailController.text.isEmpty ||
+        _signUpPasswordController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Email and password cannot be empty';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final viewModel = Provider.of<AuthViewModel>(context, listen: false);
+    final success = await viewModel.signUpWithEmailAndPassword(
+      _signUpEmailController.text,
+      _signUpPasswordController.text,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      context.go('/audio_recorder');
+    } else {
+      setState(() {
+        _errorMessage = viewModel.errorMessage;
+      });
+    }
+  }
+
+  void _resetPassword(BuildContext context) async {
+    if (_emailController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email address';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final viewModel = Provider.of<AuthViewModel>(context, listen: false);
+    final success = await viewModel.resetPassword(_emailController.text);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent')),
+      );
+    } else {
+      setState(() {
+        _errorMessage = viewModel.errorMessage;
+      });
+    }
   }
 
   @override
@@ -81,6 +183,15 @@ class _AuthScreenState extends State<AuthScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
+          if (_errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
           RoundedTextField(
             controller: _emailController,
             labelText: 'Email',
@@ -91,17 +202,23 @@ class _AuthScreenState extends State<AuthScreen>
             controller: _passwordController,
             labelText: 'Password',
             isPassword: true,
+            obscureText: _obscurePassword,
+            toggleObscureText: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
           ),
           const SizedBox(height: 20),
-          AppButton(
-            onPressed: () => context.push('/audio_recorder'),
+          _isLoading
+              ? const CircularProgressIndicator(color: Color(0xFF64CCC5))
+              : AppButton(
+            onPressed: () => _signIn(context),
             text: 'Sign In',
           ),
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: () {
-              // add functionality
-            },
+            onTap: () => _resetPassword(context),
             child: const Text(
               'Forgot Password',
               style: TextStyle(
@@ -130,20 +247,18 @@ class _AuthScreenState extends State<AuthScreen>
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(12),
                 ),
-                child: const Text('G'), // Placeholder
+                child: const Icon(Icons.g_mobiledata), // Google icon
               ),
               const SizedBox(width: 20),
               ElevatedButton(
-                onPressed: () {
-                  context.push('/audio_recorder');
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(12),
                 ),
-                child: const Text('A'), // Placeholder
+                child: const Icon(Icons.apple), // Apple icon
               ),
             ],
           ),
@@ -164,6 +279,15 @@ class _AuthScreenState extends State<AuthScreen>
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
+          if (_errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
           RoundedTextField(
             controller: _signUpEmailController,
             labelText: 'Email',
@@ -174,10 +298,18 @@ class _AuthScreenState extends State<AuthScreen>
             controller: _signUpPasswordController,
             labelText: 'Password',
             isPassword: true,
+            obscureText: _obscureSignUpPassword,
+            toggleObscureText: () {
+              setState(() {
+                _obscureSignUpPassword = !_obscureSignUpPassword;
+              });
+            },
           ),
           const SizedBox(height: 20),
-          AppButton(
-            onPressed: () => context.push('/audio_recorder'),
+          _isLoading
+              ? const CircularProgressIndicator(color: Color(0xFF64CCC5))
+              : AppButton(
+            onPressed: () => _signUp(context),
             text: 'Sign Up',
           ),
           const SizedBox(height: 20),
@@ -199,7 +331,7 @@ class _AuthScreenState extends State<AuthScreen>
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(12),
                 ),
-                child: const Text('G'), // Placeholder
+                child: const Icon(Icons.g_mobiledata), // Google icon
               ),
               const SizedBox(width: 10),
               ElevatedButton(
@@ -210,7 +342,7 @@ class _AuthScreenState extends State<AuthScreen>
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(12),
                 ),
-                child: const Text('A'), // Placeholder
+                child: const Icon(Icons.apple), // Apple icon
               ),
             ],
           ),
@@ -224,6 +356,8 @@ class RoundedTextField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final bool isPassword;
+  final bool obscureText;
+  final Function()? toggleObscureText;
   final TextInputType keyboardType;
   final double borderRadius;
 
@@ -232,6 +366,8 @@ class RoundedTextField extends StatelessWidget {
     required this.controller,
     required this.labelText,
     this.isPassword = false,
+    this.obscureText = false,
+    this.toggleObscureText,
     this.keyboardType = TextInputType.text,
     this.borderRadius = 30,
   });
@@ -240,7 +376,7 @@ class RoundedTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword && obscureText,
       keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
@@ -254,10 +390,15 @@ class RoundedTextField extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.white),
           borderRadius: BorderRadius.circular(borderRadius),
         ),
-        suffixIcon:
-            isPassword
-                ? const Icon(Icons.visibility_off, color: Colors.grey)
-                : null,
+        suffixIcon: isPassword
+            ? IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey,
+          ),
+          onPressed: toggleObscureText,
+        )
+            : null,
       ),
     );
   }
