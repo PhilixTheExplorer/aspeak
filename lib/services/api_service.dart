@@ -1,25 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import 'package:aspeak/core/env/environment.dart';
 
 class ApiService {
-  // Base URLs for different environments
-  static const String _androidEmulatorUrl = 'https://5eb1-202-28-7-39.ngrok-free.app';
-  static const String _iosSimulatorUrl =    'https://5eb1-202-28-7-39.ngrok-free.app';
-  static const String _physicalDeviceUrl =  'https://5eb1-202-28-7-39.ngrok-free.app'; // Replace with your computer's IP
-
   String response = "Waiting for response";
-  // Get the appropriate base URL based on the platform
-  static String get baseUrl {
-    if (kDebugMode) {
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        return _androidEmulatorUrl;
-      } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-        return _iosSimulatorUrl;
-      }
-    }
-    return _physicalDeviceUrl;
-  }
+
+  // Get the base URL from the environment
+  static String get baseUrl => Environment.apiBaseUrl;
 
   // Example GET request
   Future<dynamic> get(String endpoint) async {
@@ -53,4 +40,4 @@ class ApiService {
       throw Exception('API request failed with status code: ${response.statusCode}');
     }
   }
-} 
+}

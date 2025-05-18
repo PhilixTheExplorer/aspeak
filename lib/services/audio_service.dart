@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
+import 'package:aspeak/core/env/environment.dart';
 
 class AudioService {
-  static const String baseUrl = 'https://5eb1-202-28-7-39.ngrok-free.app';
+  final String baseUrl = Environment.apiBaseUrl;
 
   // Get available options
   Future<Map<String, List<String>>> getAvailableOptions() async {
@@ -82,10 +83,10 @@ class AudioService {
             'processed_${path.basename(audioFile.path)}',
           ),
         );
-        
+
         print('Saving processed audio to: ${outputFile.path}');
         await outputFile.writeAsBytes(response.bodyBytes);
-        
+
         if (await outputFile.exists()) {
           print('Successfully saved processed audio file');
           return outputFile;
@@ -101,4 +102,4 @@ class AudioService {
       throw Exception('Failed to process audio: $e');
     }
   }
-} 
+}

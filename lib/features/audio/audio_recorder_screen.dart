@@ -218,6 +218,12 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    // Get the currently logged in user from the AuthViewModel
+    final authViewModel = Provider.of<AuthViewModel>(context);
+    final String welcomeText = authViewModel.user?.email != null
+        ? 'Hello ${authViewModel.user!.email.split('@')[0]}!'
+        : 'Hello User!';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF64CCC5),
@@ -230,9 +236,9 @@ class _AudioRecorderScreenState extends State<AudioRecorderScreen>
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
-              'Hello User!',
-              style: TextStyle(
+            Text(
+              welcomeText,
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
