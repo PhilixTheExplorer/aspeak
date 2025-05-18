@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'dart:io';
 
 class AudioPlaybackScreen extends StatefulWidget {
-  const AudioPlaybackScreen({super.key});
+  final File processedAudioFile;
+  final File? originalAudioFile;
+
+  const AudioPlaybackScreen({
+    super.key,
+    required this.processedAudioFile,
+    this.originalAudioFile,
+  });
 
   @override
   State<AudioPlaybackScreen> createState() => _AudioPlaybackScreenState();
@@ -71,21 +79,20 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
     });
 
     try {
-      // Load sample audio files from remote URLs
-      // Sample 1: A short audio clip for own recording
-      await _ownRecordingPlayer.setUrl(
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      );
+      // Load the original recording if available
+      if (widget.originalAudioFile != null) {
+        await _ownRecordingPlayer.setFilePath(widget.originalAudioFile!.path);
+      }
 
-      // Sample 2: A different audio clip for converted recording
-      await _convertedRecordingPlayer.setUrl(
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-      );
+      // Load the processed audio file
+      await _convertedRecordingPlayer.setFilePath(widget.processedAudioFile.path);
     } catch (e) {
       print('Error loading audio: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load audio files: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load audio files: $e')),
+        );
+      }
     }
   }
 
@@ -124,7 +131,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
                         Icon(Icons.spatial_audio_off),
                         SizedBox(width: 8),
                         Text(
-                          "Own Recording",
+                          "Original Voice",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -210,7 +217,7 @@ class _AudioPlaybackScreenState extends State<AudioPlaybackScreen> {
                         Icon(Icons.multitrack_audio),
                         SizedBox(width: 8),
                         Text(
-                          "Converted Recording",
+                          "Converted Voice",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],

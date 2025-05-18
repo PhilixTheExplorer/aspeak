@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 
 class ApiService {
   // Base URLs for different environments
-  static const String _androidEmulatorUrl = 'https://c2c9-202-28-7-39.ngrok-free.app';
-  static const String _iosSimulatorUrl = 'https://c2c9-202-28-7-39.ngrok-free.app';
-  static const String _physicalDeviceUrl = 'https://c2c9-202-28-7-39.ngrok-free.app'; // Replace with your computer's IP
+  static const String _androidEmulatorUrl = 'https://5eb1-202-28-7-39.ngrok-free.app';
+  static const String _iosSimulatorUrl =    'https://5eb1-202-28-7-39.ngrok-free.app';
+  static const String _physicalDeviceUrl =  'https://5eb1-202-28-7-39.ngrok-free.app'; // Replace with your computer's IP
 
   String response = "Waiting for response";
   // Get the appropriate base URL based on the platform

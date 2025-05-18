@@ -19,14 +19,13 @@ class WelcomeScreen extends StatelessWidget {
               Container(
                 width: 140,
                 height: 140,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.purple,
-                ),
-                child: const Icon(
-                  Icons.graphic_eq,
-                  color: Colors.white,
-                  size: 80,
+                  image: const DecorationImage(
+                    image: AssetImage('assets/images/logo_aspeak.jpg'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

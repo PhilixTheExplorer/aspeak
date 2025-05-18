@@ -4,6 +4,7 @@ import 'package:aspeak/features/auth/auth_screen.dart';
 import 'package:aspeak/features/welcome/welcome_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:aspeak/screens/api_test_screen.dart';
+import 'dart:io';
 
 class AppRouter {
   static final router = GoRouter(
@@ -23,7 +24,13 @@ class AppRouter {
       GoRoute(
         path: '/audio_playback',
         name: 'audio_playback',
-        builder: (context, state) => const AudioPlaybackScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return AudioPlaybackScreen(
+            processedAudioFile: extra['processedAudioFile'] as File,
+            originalAudioFile: extra['originalAudioFile'] as File?,
+          );
+        },
       ),
       GoRoute(
         path: '/audio_recorder',
