@@ -9,7 +9,7 @@ class Environment {
   );
 
   // API URLs
-  static final String _devApiUrl = 'https://5eb1-202-28-7-39.ngrok-free.app';
+  static final String _devApiUrl = 'https://62f5-202-28-7-39.ngrok-free.app';
   static const String _prodApiUrl = 'https://api.aspeak.com'; // Replace with your production API
   static const String _testApiUrl = 'https://test-api.aspeak.com'; // Replace with your test API
 
